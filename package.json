@@ -1,0 +1,26 @@
+{
+  "name": "@pro4biz/electron-trusted-signing",
+  "version": "1.0.0",
+  "description": "Бібліотека для підпису застосунків на ElectronJS за допомогою Azure Trusted Signing",
+  "author": {
+    "name": "ПРО-рішення для бізнесу",
+    "email": "sale@p4b.com.ua",
+    "url": "https://p4b.com.ua"
+  },
+  "license": "MIT",
+  "private": false,
+  "main": "index.js",
+  "files": [
+    "*.jar",
+    "postinstall.js"
+  ],
+  "scripts": {
+    "preinstall": "node -e \"try { require('child_process').execSync('java -version'); } catch (e) { console.error('Error: Java is required to run this module. https://www.oracle.com/cis/java/technologies/downloads/'); process.exit(1); }\"",
+    "postinstall": "node postinstall.js",
+    "deploy": "npm publish --access public"
+  },
+  "engines": {
+    "node": ">= 18.0.0",
+    "java": ">= 1.8.0"
+  }
+}
