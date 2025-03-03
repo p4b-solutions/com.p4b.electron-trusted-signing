@@ -1,6 +1,6 @@
 {
   "name": "@pro4biz/electron-trusted-signing",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Бібліотека для підпису застосунків на ElectronJS за допомогою Azure Trusted Signing",
   "author": {
     "name": "ПРО-рішення для бізнесу",

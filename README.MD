@@ -1,4 +1,4 @@
-# Electron Azure Trust Signing
+# Electron Azure Trusted Signing
 
 This is a node library for signing windows electron builds on any platform by jsign lib.
 
