@@ -1,9 +1,12 @@
-const { existsSync, writeFileSync, readFileSync } = require("node:fs");
-const path = require("node:path");
+import { existsSync, writeFileSync, readFileSync } from "node:fs";
+import path from "node:path";
+import { execSync } from "node:child_process";
 
-const env = path.join(__dirname, "../../sign.env");
-const key = path.join(__dirname, "../../sign.key");
-const lib = path.join(__dirname, "jsign-7.1.jar");
+const project_root = path.join(__dirname, "../../../");
+const module_root = path.join(__dirname, "..");
+const env = path.join(project_root, "sign.env");
+const key = path.join(project_root, "sign.key");
+const lib = path.join(module_root, "lib/jsign-7.1.jar");
 
 async function getAccessToken({ AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET }) {
   let access_token = existsSync(key) ? readFileSync(key, "utf8") : "";
@@ -28,7 +31,7 @@ async function getAccessToken({ AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_S
   return result.access_token;
 }
 
-exports.default = async function ({ path }) {
+export default async function ({ path }) {
   if (!existsSync(env)) throw new Error(`Не знайдено файл конфігурації: sign.env`);
   const { parsed, error } = require("dotenv").config({ path: env });
   if (error) throw error;
@@ -42,5 +45,5 @@ exports.default = async function ({ path }) {
   const access_token = await getAccessToken({ AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET });
   const alias = `${TRUSTEDSIGNING_ACCOUNT_NAME}/${TRUSTEDSIGNING_PROFILE_NAME}`;
   const command = `java -jar ${lib} --keystore weu.codesigning.azure.net --storetype TRUSTEDSIGNING --storepass ${access_token} --alias ${alias} "${path}"`;
-  require("child_process").execSync(command, { stdio: "inherit" });
-};
+  execSync(command, { stdio: "inherit" });
+}
