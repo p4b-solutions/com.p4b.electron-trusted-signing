@@ -7,7 +7,7 @@ This is a node library for signing windows electron builds on any platform by js
 This module use java runtime for signing. Make sure you have a [JDK](https://www.oracle.com/cis/java/technologies/downloads/) or [JRE](https://www.java.com/en/) installed.
 
 ```bash
-npm install @pro4biz/electron-trusted-signing
+npm install electron-azure-trusted-signing
 ```
 
 ## Usage
@@ -35,7 +35,7 @@ Also you need add `"signtoolOptions"` to your build config to `"win"` section
 "win":{
    ...
    "signtoolOptions": {
-     "sign": "@pro4biz/electron-trusted-signing"
+     "sign": "electron-azure-trusted-signing"
    }
    ...
 }

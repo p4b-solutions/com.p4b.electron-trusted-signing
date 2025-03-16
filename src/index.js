@@ -6,7 +6,22 @@ const project_root = path.join(__dirname, "../../../");
 const module_root = path.join(__dirname, "..");
 const env = path.join(project_root, "sign.env");
 const key = path.join(project_root, "sign.key");
-const lib = path.join(module_root, "lib/jsign-7.1.jar");
+const jar = path.join(module_root, "lib/jsign-7.1.jar");
+
+const algoritm = (name) => {
+  switch (name) {
+    case "sha1":
+      return "SHA-1";
+    case "sha256":
+      return "SHA-256";
+    case "sha384":
+      return "SHA-384";
+    case "sha512":
+      return "SHA-512";
+    default:
+      throw new Error(`Unsupported algorithm: ${name}`);
+  }
+};
 
 async function getAccessToken({ AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET }) {
   let access_token = existsSync(key) ? readFileSync(key, "utf8") : "";
@@ -31,19 +46,26 @@ async function getAccessToken({ AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_S
   return result.access_token;
 }
 
-export default async function ({ path }) {
-  if (!existsSync(env)) throw new Error(`Не знайдено файл конфігурації: sign.env`);
+export default async function sign({ path, hash }) {
+  if (!existsSync(jar)) throw new Error(`Not found library: ${jar}`);
+  if (!existsSync(env)) throw new Error(`Not found signing config file: sign.env`);
   const { parsed, error } = require("dotenv").config({ path: env });
   if (error) throw error;
   const { AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, TRUSTEDSIGNING_ACCOUNT_NAME, TRUSTEDSIGNING_PROFILE_NAME } = parsed;
-  if (!AZURE_TENANT_ID) throw Error('Env variable "AZURE_TENANT_ID" is not set in sign.env');
-  if (!AZURE_CLIENT_ID) throw Error('Env variable "AZURE_CLIENT_ID" is not set in sign.env');
-  if (!AZURE_CLIENT_SECRET) throw Error('Env variable "AZURE_CLIENT_SECRET" is not set in sign.env');
-  if (!TRUSTEDSIGNING_ACCOUNT_NAME) throw Error('Env variable "TRUSTEDSIGNING_ACCOUNT_NAME" is not set in sign.env');
-  if (!TRUSTEDSIGNING_PROFILE_NAME) throw Error('Env variable "TRUSTEDSIGNING_PROFILE_NAME" is not set in sign.env');
-  if (!existsSync(lib)) throw new Error(`Не знайдено бібліотеку: ${lib}`);
+  if (!AZURE_TENANT_ID) throw Error('Env variable "AZURE_TENANT_ID" is not set in sign.env file');
+  if (!AZURE_CLIENT_ID) throw Error('Env variable "AZURE_CLIENT_ID" is not set in sign.env file');
+  if (!AZURE_CLIENT_SECRET) throw Error('Env variable "AZURE_CLIENT_SECRET" is not set in sign.env file');
+  if (!TRUSTEDSIGNING_ACCOUNT_NAME) throw Error('Env variable "TRUSTEDSIGNING_ACCOUNT_NAME" is not set in sign.env file');
+  if (!TRUSTEDSIGNING_PROFILE_NAME) throw Error('Env variable "TRUSTEDSIGNING_PROFILE_NAME" is not set in sign.env file');
   const access_token = await getAccessToken({ AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET });
-  const alias = `${TRUSTEDSIGNING_ACCOUNT_NAME}/${TRUSTEDSIGNING_PROFILE_NAME}`;
-  const command = `java -jar ${lib} --keystore weu.codesigning.azure.net --storetype TRUSTEDSIGNING --storepass ${access_token} --alias ${alias} "${path}"`;
+  const options = {
+    alg: algoritm(hash),
+    alias: `${TRUSTEDSIGNING_ACCOUNT_NAME}/${TRUSTEDSIGNING_PROFILE_NAME}`,
+    keystore: `weu.codesigning.azure.net`,
+    storetype: `TRUSTEDSIGNING`,
+    storepass: access_token,
+  };
+  const params = Object.keys(options).map((key) => `--${key} ${options[key]}`);
+  const command = `java -jar ${jar} ${params.join(" ")} "${path}"`;
   execSync(command, { stdio: "inherit" });
 }
