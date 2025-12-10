@@ -1,6 +1,6 @@
 {
   "name": "electron-azure-trusted-signing",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Library for signing application on ElectronJS using Azure Trusted Signing",
   "author": {
     "name": "ПРО-рішення для бізнесу",
@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "build": "rollup -c",
-    "preinstall": "node -e \"try { require('child_process').execSync('java -version'); } catch (e) { console.error('Error: Java is required to run this module. https://www.oracle.com/cis/java/technologies/downloads/'); process.exit(1); }\"",
+    "preinstall": "node -e \"try { if(require('process').platform === 'win32') require('child_process').execSync('java -version'); } catch (e) { console.error('Error: Java is required to run this module. https://www.oracle.com/cis/java/technologies/downloads/'); process.exit(1); }\"",
     "postinstall": "node postinstall.js",
     "prepack": "npm run build",
     "deploy": "npm publish --access public"
